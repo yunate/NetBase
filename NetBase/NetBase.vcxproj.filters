@@ -30,9 +30,6 @@
     <ClCompile Include="DownloadHelper.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="..\lib\Log\Dog_Lock.cpp">
       <Filter>Log</Filter>
     </ClCompile>
@@ -60,6 +57,15 @@
     <ClCompile Include="DownCore_Curl.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="DownCore_WinINet.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lib\zmbase\streams.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lib\zmbase\string_convert.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Downloader.h">
@@ -69,9 +75,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="DownloadHelper.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="stdafx.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="DownLoadDef.h">
@@ -108,6 +111,18 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="DownCore_Curl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DownCore_WinINet.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\zmbase\Streams.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\zmbase\string_convert.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="NetBaseHead.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

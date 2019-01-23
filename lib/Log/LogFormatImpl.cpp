@@ -1,7 +1,6 @@
-#include "stdafx.h"
+#define  _CRT_SECURE_NO_WARNINGS
 #include "LogFormatImpl.h"
 #include <time.h>
-
 
 void TimeStampFormat::Format(ILog & log)
 {

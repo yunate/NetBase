@@ -1,5 +1,8 @@
-#ifndef __DOWN_CORE_CURL_H
-#define __DOWN_CORE_CURL_H
+#ifndef __DOWN_CORE_CURL_H_
+#define __DOWN_CORE_CURL_H_
+
+#define  CURL_STATICLIB
+#define  HTTP_ONLY
 
 #include "IDownCore.h"
 

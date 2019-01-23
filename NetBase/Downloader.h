@@ -37,10 +37,8 @@ private:
 	void _Execute();
 
 private:
-	bool                m_bCancel;
 	std::string         m_sTempPath;
-	std::ostream *		m_pOutStream;
-	int					m_nBuffSize;
+	ZMStream *			m_pOutStream;
 	DownloadData		m_DwonloadData;
 	const RequestInfo	m_Info;
 	IDownCore *			m_pDownCore;

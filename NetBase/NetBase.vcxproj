@@ -28,14 +28,14 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -73,14 +73,14 @@
     <IntDir>$(SolutionDir)build\$(Configuration)\tmp\</IntDir>
     <TargetName>$(ProjectName)d</TargetName>
     <TargetExt>.lib</TargetExt>
-    <IncludePath>$(SolutionDir)lib\;$(SolutionDir)lib\thread;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)lib\;$(SolutionDir)lib\thread;$(SolutionDir)lib\zmbase\;$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib\curl\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)build\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)build\$(Configuration)\tmp\</IntDir>
     <TargetExt>.lib</TargetExt>
-    <IncludePath>$(SolutionDir)lib\;$(SolutionDir)lib\thread;$(ProjectDir);$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)lib\;$(SolutionDir)lib\thread;$(SolutionDir)lib\zmbase\;$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib\curl\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -88,7 +88,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PrecompiledHeader>Create</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -107,7 +107,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PrecompiledHeader>Create</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
@@ -137,12 +137,14 @@
     <ClCompile Include="..\lib\Log\LogTracerImpl.cpp" />
     <ClCompile Include="..\lib\thread\BaseTask.cpp" />
     <ClCompile Include="..\lib\thread\BaseThread.cpp" />
+    <ClCompile Include="..\lib\zmbase\streams.cpp" />
+    <ClCompile Include="..\lib\zmbase\string_convert.cpp" />
     <ClCompile Include="DownCore_Curl.cpp" />
+    <ClCompile Include="DownCore_WinINet.cpp" />
     <ClCompile Include="Downloader.cpp" />
     <ClCompile Include="DownloaderPool.cpp" />
     <ClCompile Include="DownloadHelper.cpp" />
     <ClCompile Include="IDownCore.cpp" />
-    <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\lib\Log\Dog_Lock.h" />
@@ -154,13 +156,16 @@
     <ClInclude Include="..\lib\thread\BaseTask.h" />
     <ClInclude Include="..\lib\thread\BaseThread.h" />
     <ClInclude Include="..\lib\thread\ThreadLocker.h" />
+    <ClInclude Include="..\lib\zmbase\Streams.h" />
+    <ClInclude Include="..\lib\zmbase\string_convert.h" />
     <ClInclude Include="DownCore_Curl.h" />
+    <ClInclude Include="DownCore_WinINet.h" />
     <ClInclude Include="DownLoadDef.h" />
     <ClInclude Include="Downloader.h" />
     <ClInclude Include="DownloaderPool.h" />
     <ClInclude Include="DownloadHelper.h" />
     <ClInclude Include="IDownCore.h" />
-    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="NetBaseHead.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "NetBaseHead.h"
 #include "DownloadHelper.h"
 #include "thread/BaseThread.h"
 

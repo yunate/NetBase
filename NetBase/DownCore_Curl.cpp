@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "NetBaseHead.h"
 
 #include "DownCore_Curl.h"
 #include "curl/curl.h"
@@ -89,14 +89,23 @@ bool DownCore_Curl::Down()
 			curl_easy_setopt(curl, CURLOPT_POST, 1);
 
 			// 设置请求头部
-			headers = curl_slist_append(headers, "Content-Type:application/json;charset=UTF-8");
+			headers = curl_slist_append(headers, m_pInfo->m_sHead.c_str());
 			curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
-			// 设置要POST的JSON数据
-			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, m_pInfo->m_sRequest.c_str());
+			if (m_pInfo->m_pBodyStream)
+			{
+				INT64 nSize = m_pInfo->m_pBodyStream->GetSize();
+				char * pBuff = new char[(unsigned int)nSize];
+				m_pInfo->m_pBodyStream->Seek(0, FILE_BEGIN);
+				m_pInfo->m_pBodyStream->Read(pBuff, (DWORD)nSize);
 
-			//设置上传json串长度,这个设置可以忽略
-			curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, m_pInfo->m_sRequest.size());
+				// 设置要POST的JSON数据
+				curl_easy_setopt(curl, CURLOPT_POSTFIELDS, pBuff);
+
+				//设置上传json串长度,这个设置可以忽略
+				curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, nSize);
+				delete[] pBuff;
+			}
 		}
 
 		// 运行重定向

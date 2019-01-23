@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "LogDoggy.h"
 #include "LogTracerImpl.h"
 #include "LogImpl.h"

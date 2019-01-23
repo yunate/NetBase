@@ -5,6 +5,7 @@
 #define TIMEOUT 30
 #define IS_DOUBLE_ZERO(d)  (abs(d) < 1e-8)
 
+
 // 下载的种类
 typedef  unsigned int DOWNLOADER_TYPE;
 
@@ -18,6 +19,8 @@ enum REQUESET_TYPE
 	//REQUESET_TYPE_DELETE
 };
 
+class ZMStream;
+
 // 准备数据
 struct RequestInfo
 {
@@ -25,7 +28,7 @@ struct RequestInfo
 		: m_nRequestType(REQUESET_TYPE_GET)
 		, m_nType(0)
 		, m_sUrl("")
-		, m_sRequest("")
+		, m_pBodyStream(0)
 		, m_sSvePath("")
 		, m_pOutStream(0)
 		, m_userdata(0)
@@ -36,9 +39,10 @@ struct RequestInfo
 	REQUESET_TYPE				m_nRequestType;		// 请求种类（get，post等）,默认get
 	DOWNLOADER_TYPE	            m_nType;			// 下载的是什么种类（默认是0），用于某几个下载的统一处理
 	std::string					m_sUrl;				// 下载地址
-	std::string					m_sRequest;			// 请求内容，m_nRequestType == REQUESET_TYPE_POST时候使用，一般是json格式
+	ZMStream *					m_pBodyStream;		// 请求内容，
+	std::string					m_sHead;			// 请求头
 	std::string					m_sSvePath;			// 想要保存的路径
-	std::ostream *				m_pOutStream;		// 流，这个参数不为0时，m_sSvePath无效
+	ZMStream *					m_pOutStream;		// 流，这个参数不为0时，m_sSvePath无效
 	unsigned int				m_userdata;			// 用户数据，比如用户将一个界面的指针传过来
 };
 

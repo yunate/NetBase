@@ -1,4 +1,3 @@
-#include "stdafx.h"
 
 #include "BaseThread.h"
 #include "BaseTask.h"

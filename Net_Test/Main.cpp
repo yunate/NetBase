@@ -5,6 +5,7 @@
 #include "DownLoadDef.h"
 #include "DownloadHelper.h"
 #include "thread/BaseThread.h"
+#include "Streams.h"
 #include <sstream>
 
 //// ÄÚ´æÐ¹Â¶¼ì²âÆ÷
@@ -13,12 +14,14 @@
 #include "..//vld//head//vld.h"
 #endif
 
+
 void main()
 {
 	//_CrtSetBreakAlloc(121);
 	__int64 t1 = clock();
 	RequestInfo info;
-	std::stringstream ss;
+	ZMMemoryStream ss;
+	ZMMemoryStream sBody;
 
 	if (true)
 	{
@@ -26,7 +29,10 @@ void main()
 		info.m_sUrl = "http://test.api.guangsuss.com/user/query_userinfo";
 		info.m_pOutStream = &ss;
 		info.m_nRequestType = REQUESET_TYPE_POST;
-		info.m_sRequest = "{\r\n \"data\" :\r\n{\r\n\"mac\" : \"8C-EC-4B-45-AD-38\",\r\n\"mobile\" : \"18362829801\"\r\n},\r\n\"meta\" :\r\n{\r\n\"token\" : \"889cb54dc82603c530b3181f9f07a1cd\"\r\n }\r\n}";
+		char stmp[] = "{\r\n \"data\" :\r\n{\r\n\"mac\" : \"8C-EC-4B-45-AD-38\",\r\n\"mobile\" : \"18362829801\"\r\n},\r\n\"meta\" :\r\n{\r\n\"token\" : \"889cb54dc82603c530b3181f9f07a1cd\"\r\n }\r\n}";
+		sBody.Write(stmp, sizeof(stmp) - 1);
+		info.m_pBodyStream = &sBody;
+		info.m_sHead = "Content-Type:application/json;charset=UTF-8";
 	}
 	else
 	{
@@ -59,7 +65,10 @@ void main()
 
 	if (info.m_pOutStream)
 	{
-		printf(ss.str().c_str());
+		info.m_pOutStream->Seek(0, FILE_BEGIN);
+		std::vector<BYTE> by  = info.m_pOutStream->ReadAll();
+		std::string s(by.begin(), by.end());
+		printf("%s", s.c_str());
 	}
 
 	__int64 t2 = clock();

@@ -75,11 +75,11 @@
     <IntDir>$(SolutionDir)build\$(Configuration)\tmp\</IntDir>
     <ReferencePath>$(SolutionDir)build\$(Configuration)\;$(ReferencePath)</ReferencePath>
     <LibraryPath>$(SolutionDir)lib\curl\;$(LibraryPath)</LibraryPath>
-    <IncludePath>E:\projects\NetBase\NetBase\;E:\projects\NetBase\lib\;$(IncludePath)</IncludePath>
+    <IncludePath>E:\projects\NetBase\NetBase\;E:\projects\NetBase\lib\;$(SolutionDir)lib\zmbase\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
-    <IncludePath>E:\projects\NetBase\NetBase\;E:\projects\NetBase\lib\;$(IncludePath)</IncludePath>
+    <IncludePath>E:\projects\NetBase\NetBase\;E:\projects\NetBase\lib\;$(SolutionDir)lib\zmbase\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib\curl\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)build\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)build\$(Configuration)\tmp\</IntDir>

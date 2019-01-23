@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "NetBaseHead.h"
 #include "IDownCore.h"
 
 IDownCore::IDownCore()

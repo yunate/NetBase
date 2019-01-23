@@ -1,7 +1,8 @@
-#ifndef __IDOWN_CORE_H
-#define __IDOWN_CORE_H
+#ifndef __IDOWN_CORE_H_
+#define __IDOWN_CORE_H_
 
 #include "DownLoadDef.h"
+#include "Streams.h"
 
 #include <functional>
 
@@ -14,7 +15,7 @@ public:
 	IDownCore();
 	~IDownCore();
 
-	inline void Construct(const RequestInfo * pInfo, std::ostream * pOutStream
+	inline void Construct(const RequestInfo * pInfo, ZMStream * pOutStream
 		, WriteCallBack writeCall, ProgressCallBack progressCall)
 	{
 		m_pInfo = pInfo;
@@ -58,7 +59,7 @@ public:
 
 protected:
 	const RequestInfo *			m_pInfo;
-	std::ostream *				m_pOutStream;
+	ZMStream *					m_pOutStream;
 	WriteCallBack				m_WriteCallBack;
 	ProgressCallBack			m_ProgressBack;
 

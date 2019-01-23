@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "Dog_Lock.h"
 
 Dog_Lock::Dog_Lock(std::mutex* mutex)

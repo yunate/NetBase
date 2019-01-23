@@ -1,4 +1,3 @@
-#include "stdafx.h"
 #include "LogImpl.h"
 #include "LogFormatImpl.h"
 

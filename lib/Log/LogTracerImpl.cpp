@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#define  _CRT_SECURE_NO_WARNINGS
 #include <fstream>
 #include <sstream>
 
@@ -9,7 +9,6 @@
 #include <assert.h>
 #include <iostream>
 #endif
-
 #define MAX_LOG_FILE_SIZE 10
 
 /*************************本地日志*******************************************/

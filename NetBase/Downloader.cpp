@@ -1,10 +1,14 @@
-#include "stdafx.h"
+#include "NetBaseHead.h"
 
 #include "Downloader.h"
 #include "DownloaderPool.h"
-#include "functional"
+#include "string_convert.h"
+
 #include "DownCore_Curl.h"
+#include "DownCore_WinINet.h"
+
 #include <fstream>
+#include <functional>
 #include <windows.h>
 
 // fwirte缓冲有点奇怪，这里一旦数据大于1048576，强制刷一下
@@ -12,12 +16,10 @@
 
 Downloader::Downloader(const RequestInfo& info) :
 	m_Info(info),
-	m_bCancel(false),
-	m_nBuffSize(0),
 	m_pDownCore(0)
 {
 	m_sTempPath = m_Info.m_sSvePath + ".temp";
-	DeleteFile(m_sTempPath.c_str());
+	DeleteFileA(m_sTempPath.c_str());
 
 	if (m_Info.m_pOutStream)
 	{
@@ -25,26 +27,22 @@ Downloader::Downloader(const RequestInfo& info) :
 	}
 	else
 	{
-		m_pOutStream = new std::ofstream(m_sTempPath.c_str(), std::ios::binary);
+		m_pOutStream = new ZMFileStream(base::MultibytesToUnicode(m_sTempPath.c_str(), 0), fmOpenReadWrite);
 	}
 }
 
 Downloader::~Downloader()
 {
-	
+	if (m_pDownCore)
+	{
+		delete m_pDownCore;
+		m_pDownCore = 0;
+	}
 }
 
 bool Downloader::WriteDownFileCallBack(void * ptr, size_t size)
 {
-	m_pOutStream->write((char*)ptr, size);
-	m_nBuffSize += size;
-
-	if (BUFFMAXSIZE <= m_nBuffSize)
-	{
-		m_nBuffSize = 0;
-		m_pOutStream->flush();
-	}
-
+	m_pOutStream->Write((char*)ptr, size);
 	return true;
 }
 
@@ -53,17 +51,19 @@ bool Downloader::DownProcessCallBack(
 	double dnow								// 下载使用（已下载）
 )
 {
-	if (!IS_DOUBLE_ZERO(dtotal))
-	{
-		OnDownLoading(dtotal, dnow);
-	}
-
+	OnDownLoading(dtotal, dnow);
 	return true;
 }
 
 void Downloader::_Execute()
 {
-	m_pDownCore = new DownCore_Curl();
+	if (!m_pOutStream)
+	{
+		return;
+	}
+
+	//m_pDownCore = new DownCore_Curl();
+	m_pDownCore = new DownCore_WinINet();
 	m_pDownCore->Construct(&m_Info
 		, m_pOutStream
 		, std::bind(&Downloader::WriteDownFileCallBack, this, std::placeholders::_1, std::placeholders::_2)
@@ -71,12 +71,18 @@ void Downloader::_Execute()
 
 	bool bRes = m_pDownCore->Down();
 	
+	if (!m_Info.m_pOutStream)
+	{
+		delete m_pOutStream;
+		m_pOutStream = 0;
+	}
+
 	if (bRes)
 	{
 		if (!m_Info.m_pOutStream)
 		{
 			// 将临时文件转换为正常文件
-			MoveFile(m_sTempPath.c_str(), m_Info.m_sSvePath.c_str());
+			MoveFileA(m_sTempPath.c_str(), m_Info.m_sSvePath.c_str());
 		}
 		
 		m_DwonloadData.m_bResult = true;
@@ -86,18 +92,10 @@ void Downloader::_Execute()
 		if (!m_Info.m_pOutStream)
 		{
 			// 如果意外终止，删除临时文件,不要在其他地方删除
-			DeleteFile(m_sTempPath.c_str());
+			DeleteFileA(m_sTempPath.c_str());
 		}
 		
 		m_DwonloadData.m_bResult = false;
-	}
-
-	m_pOutStream->flush();
-
-	if (!m_Info.m_pOutStream)
-	{
-		delete m_pOutStream;
-		m_pOutStream = 0;
 	}
 
 	m_DwonloadData.m_bIsEnd = true;
