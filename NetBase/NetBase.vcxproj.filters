@@ -13,5 +13,102 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Log">
+      <UniqueIdentifier>{ac423580-b587-4dbb-9d58-19719f4d77dd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Thread">
+      <UniqueIdentifier>{3368bdc4-01e4-4661-b781-e94ef77dc9e5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Downloader.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DownloaderPool.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DownloadHelper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lib\Log\Dog_Lock.cpp">
+      <Filter>Log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lib\Log\LogDoggy.cpp">
+      <Filter>Log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lib\Log\LogFormatImpl.cpp">
+      <Filter>Log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lib\Log\LogImpl.cpp">
+      <Filter>Log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lib\Log\LogTracerImpl.cpp">
+      <Filter>Log</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lib\thread\BaseThread.cpp">
+      <Filter>Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lib\thread\BaseTask.cpp">
+      <Filter>Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="IDownCore.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DownCore_Curl.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Downloader.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DownloaderPool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DownloadHelper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DownLoadDef.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\Log\Dog_Lock.h">
+      <Filter>Log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\Log\ILog.hpp">
+      <Filter>Log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\Log\LogDoggy.h">
+      <Filter>Log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\Log\LogFormatImpl.h">
+      <Filter>Log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\Log\LogImpl.h">
+      <Filter>Log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\Log\LogTracerImpl.h">
+      <Filter>Log</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\thread\BaseThread.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\thread\ThreadLocker.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\thread\BaseTask.h">
+      <Filter>Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="IDownCore.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="DownCore_Curl.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
