@@ -1,15 +1,10 @@
 #include "NetBaseHead.h"
+#ifdef USELIB_CURL
+#include "NetBaseHead.h"
 
 #include "DownCore_Curl.h"
 #include "curl/curl.h"
 #include "log/LogDoggy.h"
-
-
-#pragma comment(lib, "WS2_32")
-#pragma comment(lib, "Wldap32.lib")
-#pragma comment(lib, "Crypt32.lib")
-#pragma comment(lib, "Normaliz.lib")
-#pragma comment(lib, "libcurl.lib")
 
 
 #define TIMEOUT 30
@@ -98,19 +93,21 @@ bool DownCore_Curl::Down(NETBASE_DOWN_STATUS & nCode, std::string & sDes)
 			curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 		}
 
+		char * pBody = 0;
+
 		if (m_pInfo->m_pBodyStream)
 		{
 			INT64 nSize = m_pInfo->m_pBodyStream->GetSize();
-			char * pBuff = new char[(unsigned int)nSize];
+			pBody = new char[(unsigned int)nSize + 1];
 			m_pInfo->m_pBodyStream->Seek(0, FILE_BEGIN);
-			m_pInfo->m_pBodyStream->Read(pBuff, (DWORD)nSize);
+			m_pInfo->m_pBodyStream->Read(pBody, (DWORD)nSize);
+			pBody[nSize] = 0;
 
 			// 设置要POST的JSON数据
-			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, pBuff);
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, pBody);
 
 			//设置上传json串长度,这个设置可以忽略
-			curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, nSize);
-			delete[] pBuff;
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, strlen(pBody));
 		}
 
 		//设定为验证证书和HOST
@@ -143,9 +140,14 @@ bool DownCore_Curl::Down(NETBASE_DOWN_STATUS & nCode, std::string & sDes)
 			curl_slist_free_all(headers);
 		}
 
+		if (pBody)
+		{
+			delete[]pBody;
+		}
+
 		curl_easy_cleanup(curl);
 
-		if (!res)
+		if (CURLE_OK != res)
 		{
 			std::string sError = "download failure, url:";
 			sError += m_pInfo->m_sUrl;
@@ -161,3 +163,4 @@ bool DownCore_Curl::Down(NETBASE_DOWN_STATUS & nCode, std::string & sDes)
 	
 	return true;
 }
+#endif

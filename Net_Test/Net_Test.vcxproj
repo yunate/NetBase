@@ -29,14 +29,14 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -75,11 +75,11 @@
     <IntDir>$(SolutionDir)build\$(Configuration)\tmp\</IntDir>
     <ReferencePath>$(SolutionDir)build\$(Configuration)\;$(ReferencePath)</ReferencePath>
     <LibraryPath>$(SolutionDir)lib\curl\;$(LibraryPath)</LibraryPath>
-    <IncludePath>E:\projects\NetBase\NetBase\;E:\projects\NetBase\lib\;$(SolutionDir)lib\zmbase\;$(IncludePath)</IncludePath>
+    <IncludePath>E:\projects\NetBase\NetBase2\;$(SolutionDir)lib\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ExecutablePath>$(ExecutablePath)</ExecutablePath>
-    <IncludePath>E:\projects\NetBase\NetBase\;E:\projects\NetBase\lib\;$(SolutionDir)lib\zmbase\;$(IncludePath)</IncludePath>
+    <IncludePath>E:\projects\NetBase\NetBase2\;$(SolutionDir)lib\;$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib\curl\;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)build\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)build\$(Configuration)\tmp\</IntDir>
@@ -103,7 +103,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>MinSpace</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
@@ -132,8 +132,8 @@
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NetBase\NetBase.vcxproj">
-      <Project>{e4bc7be6-2371-4e2a-af18-4b935f9a5767}</Project>
+    <ProjectReference Include="..\NetBase2\NetBase2.vcxproj">
+      <Project>{cd94c94c-c0ef-425a-af0e-078fa3ce653b}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

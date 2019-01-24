@@ -1,3 +1,4 @@
+#ifdef USELIB_CURL
 #ifndef __DOWN_CORE_CURL_H_
 #define __DOWN_CORE_CURL_H_
 
@@ -26,5 +27,5 @@ public:
 		return m_bPause;
 	}
 };
-
+#endif // DEBUG
 #endif

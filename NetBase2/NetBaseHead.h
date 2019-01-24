@@ -5,6 +5,8 @@
 // 
 
 #if defined USELIB_CURL
+#define  CURL_STATICLIB
+#define  HTTP_ONLY
 #pragma comment(lib, "WS2_32")
 #pragma comment(lib, "Wldap32.lib")
 #pragma comment(lib, "Crypt32.lib")

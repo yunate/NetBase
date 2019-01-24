@@ -1,16 +1,10 @@
 
-#include <stdio.h>
-#include <windows.h>
-
-#include "DownLoadDef.h"
-#include "DownloadHelper.h"
-#include "thread/BaseThread.h"
-#include "Streams.h"
 #include "NetBaseExport.h"
-#include "string_convert.h"
-#include <sstream>
+#include <stdio.h>
+#include <time.h>
+#include <map>
 
-//// ÄÚ´æÐ¹Â¶¼ì²âÆ÷
+// ÄÚ´æÐ¹Â¶¼ì²âÆ÷
 #ifndef NDEBUG
 #pragma comment(lib, "..//vld//release//vld.lib")
 #include "..//vld//head//vld.h"
@@ -18,7 +12,8 @@
 
 void process(int id, INT64  contentLength, INT64 readCount, bool& abort)
 {
-	//printf("all : %d, current:%d  \r\n", contentLength, readCount);
+	int i = 0;
+	++i;
 }
 
 void end(int id, NETBASE_DOWN_STATUS responseCode, ZMString)
@@ -26,9 +21,10 @@ void end(int id, NETBASE_DOWN_STATUS responseCode, ZMString)
 	int i = 0;
 	++i;
 }
+
 void main()
 {
-	//_CrtSetBreakAlloc(121);
+	//_CrtSetBreakAlloc(99);
 	bool bGet = true;
 	ZMMemoryStream ss;
 	__int64 t1 = clock();
@@ -37,8 +33,8 @@ void main()
 	
 		ZMFileStream  pOutStream(L"C:\\Users\\ydh\\Desktop\\d\\2.json", fmOpenReadWrite | fmCreate);
 		HttpHeader  headers;
-		//ZMString sUrl = L"http://down.udashi.com/Local%20mode/PE/4.7.38.3/WIN03PE.ISO";
-		ZMString sUrl = L"https://www.baidu.com";
+		ZMString sUrl = L"http://down.udashi.com/Local%20mode/PE/4.7.38.3/WIN03PE.ISO";
+		//ZMString sUrl = L"https://www.baidu.com";
 		HttpGet(sUrl, 0, headers, &pOutStream, process, end);
 	}
 	else
@@ -48,7 +44,7 @@ void main()
 		ZMString sUrl = L"http://test.api.guangsuss.com/user/query_userinfo";
 		ZMMemoryStream sBody;
 		char stmp[] = "{\r\n \"data\" :\r\n{\r\n\"mac\" : \"8C-EC-4B-45-AD-38\",\r\n\"mobile\" : \"18362829801\"\r\n},\r\n\"meta\" :\r\n{\r\n\"token\" : \"889cb54dc82603c530b3181f9f07a1cd\"\r\n }\r\n}";
-		sBody.Write(stmp, sizeof(stmp) - 1);
+		sBody.Write(stmp, sizeof(stmp));
 		HttpPost(sUrl, 0, headers, &ss, &sBody);
 	}
 
@@ -106,6 +102,6 @@ void main()
 	}
 
 	__int64 t2 = clock();
-	printf("\r\n%d ms\r\n", t2 - t1);
+	printf("\r\n%I64d ms\r\n", t2 - t1);
 	system("pause");
 }

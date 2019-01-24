@@ -11,8 +11,6 @@
 #include <functional>
 #include <windows.h>
 
-// fwirte缓冲有点奇怪，这里一旦数据大于1048576，强制刷一下
-#define BUFFMAXSIZE	1048576	 
 
 Downloader::Downloader(const RequestInfo& info) :
 	m_Info(info),
@@ -74,8 +72,12 @@ void Downloader::_Execute()
 		return;
 	}
 
-	//m_pDownCore = new DownCore_Curl();
+#if defined USELIB_CURL
+	m_pDownCore = new DownCore_Curl();
+#elif defined USELIB_WININET
 	m_pDownCore = new DownCore_WinINet();
+#endif // USELIB_CURL
+
 	m_pDownCore->Construct(&m_Info
 		, m_pOutStream
 		, std::bind(&Downloader::WriteDownFileCallBack, this, std::placeholders::_1, std::placeholders::_2)

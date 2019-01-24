@@ -1,3 +1,4 @@
+#ifdef USELIB_WININET
 #ifndef __DOWN_CORE_WININET_H_
 #define __DOWN_CORE_WININET_H_
 #include "IDownCore.h"
@@ -91,4 +92,5 @@ private:
 	static StaticIntHandleObj	s_hSessison;
 };
 
+#endif
 #endif

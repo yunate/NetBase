@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{E4BC7BE6-2371-4E2A-AF18-4B935F9A5767}</ProjectGuid>
-    <RootNamespace>NetBase</RootNamespace>
+    <ProjectGuid>{CD94C94C-C0EF-425A-AF0E-078FA3CE653B}</ProjectGuid>
+    <RootNamespace>NetBase2</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -69,18 +69,15 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(SolutionDir)lib\;$(SolutionDir)lib\thread;$(SolutionDir)lib\zmbase\;$(ProjectDir);$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)build\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)build\$(Configuration)\tmp\</IntDir>
-    <TargetName>$(ProjectName)d</TargetName>
-    <TargetExt>.lib</TargetExt>
-    <IncludePath>$(SolutionDir)lib\;$(SolutionDir)lib\thread;$(SolutionDir)lib\zmbase\;$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib\curl\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>$(SolutionDir)lib\;$(SolutionDir)lib\thread;$(SolutionDir)lib\zmbase\;$(ProjectDir);$(IncludePath)</IncludePath>
     <OutDir>$(SolutionDir)build\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)build\$(Configuration)\tmp\</IntDir>
-    <TargetExt>.lib</TargetExt>
-    <IncludePath>$(SolutionDir)lib\;$(SolutionDir)lib\thread;$(SolutionDir)lib\zmbase\;$(ProjectDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)lib\curl\;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -88,9 +85,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -103,13 +98,11 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MinSpace</Optimization>
+      <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -130,44 +123,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\lib\Log\Dog_Lock.cpp" />
-    <ClCompile Include="..\lib\Log\LogDoggy.cpp" />
-    <ClCompile Include="..\lib\Log\LogFormatImpl.cpp" />
-    <ClCompile Include="..\lib\Log\LogImpl.cpp" />
-    <ClCompile Include="..\lib\Log\LogTracerImpl.cpp" />
-    <ClCompile Include="..\lib\thread\BaseTask.cpp" />
-    <ClCompile Include="..\lib\thread\BaseThread.cpp" />
-    <ClCompile Include="..\lib\zmbase\streams.cpp" />
-    <ClCompile Include="..\lib\zmbase\string_convert.cpp" />
-    <ClCompile Include="DownCore_Curl.cpp" />
-    <ClCompile Include="DownCore_WinINet.cpp" />
-    <ClCompile Include="Downloader.cpp" />
-    <ClCompile Include="DownloaderPool.cpp" />
-    <ClCompile Include="DownloadHelper.cpp" />
-    <ClCompile Include="NetBaseExport.cpp" />
-    <ClCompile Include="IDownCore.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\lib\Log\Dog_Lock.h" />
-    <ClInclude Include="..\lib\Log\ILog.hpp" />
-    <ClInclude Include="..\lib\Log\LogDoggy.h" />
-    <ClInclude Include="..\lib\Log\LogFormatImpl.h" />
-    <ClInclude Include="..\lib\Log\LogImpl.h" />
-    <ClInclude Include="..\lib\Log\LogTracerImpl.h" />
-    <ClInclude Include="..\lib\thread\BaseTask.h" />
-    <ClInclude Include="..\lib\thread\BaseThread.h" />
-    <ClInclude Include="..\lib\thread\ThreadLocker.h" />
     <ClInclude Include="..\lib\zmbase\Streams.h" />
     <ClInclude Include="..\lib\zmbase\string_convert.h" />
-    <ClInclude Include="DownCore_Curl.h" />
-    <ClInclude Include="DownCore_WinINet.h" />
-    <ClInclude Include="DownLoadDef.h" />
-    <ClInclude Include="Downloader.h" />
-    <ClInclude Include="DownloaderPool.h" />
-    <ClInclude Include="DownloadHelper.h" />
     <ClInclude Include="NetBaseExport.h" />
-    <ClInclude Include="IDownCore.h" />
     <ClInclude Include="NetBaseHead.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\lib\zmbase\streams.cpp" />
+    <ClCompile Include="..\lib\zmbase\string_convert.cpp" />
+    <ClCompile Include="NetBaseExport_Curl.cpp" />
+    <ClCompile Include="NetBaseExport_WinINet.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

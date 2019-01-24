@@ -1,9 +1,9 @@
 #include "NetBaseHead.h"
-#include "NetBaseHead.h"
+#ifdef USELIB_WININET
+#define  _CRT_SECURE_NO_WARNINGS
 #include "DownCore_WinINet.h"
 #include "log/LogDoggy.h"
 
-#pragma comment(lib, "WinINet.lib")
 
 StaticIntHandleObj DownCore_WinINet::s_hInternet;
 StaticIntHandleObj DownCore_WinINet::s_hSessison;
@@ -23,6 +23,12 @@ bool DownCore_WinINet::Down(NETBASE_DOWN_STATUS & nCode, std::string & sDes)
 
 	try
 	{
+		if (!m_pOutStream)
+		{
+			std::string sError = "m_pOutStream null";
+			throw std::exception(sError.c_str());
+		}
+
 		// 1°¢Ω‚ŒˆURL
 		if (!CrackUrl())
 		{
@@ -237,3 +243,4 @@ bool DownCore_WinINet::CrackUrl()
 
 	return true;
 }
+#endif
