@@ -13,7 +13,7 @@ public:
 	~DownCore_Curl();
 
 public:
-	bool Down();
+	bool Down(NETBASE_DOWN_STATUS & nCode, std::string & sDes);
 
 public:
 	inline bool GetStop()

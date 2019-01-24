@@ -1,10 +1,8 @@
 #ifndef __DownloadDef_H_
 #define __DownloadDef_H_
 
+#include "NetBaseExport.h"
 #include <string>
-#define TIMEOUT 30
-#define IS_DOUBLE_ZERO(d)  (abs(d) < 1e-8)
-
 
 // 下载的种类
 typedef  unsigned int DOWNLOADER_TYPE;
@@ -44,6 +42,11 @@ struct RequestInfo
 	std::string					m_sSvePath;			// 想要保存的路径
 	ZMStream *					m_pOutStream;		// 流，这个参数不为0时，m_sSvePath无效
 	unsigned int				m_userdata;			// 用户数据，比如用户将一个界面的指针传过来
+
+	// 下面三个由于需求添加回调使用
+	unsigned int				m_nId;
+	ProgressEvent				m_ProcessEvent;
+	ResponseResult				m_ResponseResEvent;
 };
 
 // 过程数据

@@ -13,7 +13,7 @@ class IDownCore
 {
 public:
 	IDownCore();
-	~IDownCore();
+	virtual ~IDownCore();
 
 	inline void Construct(const RequestInfo * pInfo, ZMStream * pOutStream
 		, WriteCallBack writeCall, ProgressCallBack progressCall)
@@ -25,7 +25,7 @@ public:
 	}
 
 public:
-	virtual bool Down() = 0;
+	virtual bool Down(NETBASE_DOWN_STATUS & nCode, std::string & sDes) = 0;
 	virtual double GetSize() { return 0; };			// 将要下载的大小
 	virtual bool Stop() { return m_bStop = true; };
 	virtual bool Pause() { return m_bPause = true; };

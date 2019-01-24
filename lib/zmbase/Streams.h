@@ -50,6 +50,7 @@ bool         GetFileTime(const ZMString& AFileName, FILETIME& ftCreationTime, FI
 class  ZMStream 
 {
 public:
+	virtual            ~ZMStream() {};
 	virtual    INT64   GetPosition();
 	virtual    void    SetPosition(INT64 pos);
 	virtual    INT64   GetSize();

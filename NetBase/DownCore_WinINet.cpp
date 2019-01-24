@@ -16,7 +16,7 @@ DownCore_WinINet::~DownCore_WinINet()
 {
 }
 
-bool DownCore_WinINet::Down()
+bool DownCore_WinINet::Down(NETBASE_DOWN_STATUS & nCode, std::string & sDes)
 {
 	bool bRes = true;
 	HINTERNET hRequest  = NULL;
@@ -68,12 +68,23 @@ bool DownCore_WinINet::Down()
 			s_hSessison.SetDes(sSecssionDes);
 		}
 
+		DWORD tmpFlag = m_pInfo->m_nRequestType == REQUESET_TYPE_POST ? INTERNET_FLAG_KEEP_CONNECTION :
+			(INTERNET_FLAG_RELOAD | INTERNET_FLAG_PRAGMA_NOCACHE);
+		DWORD flags = tmpFlag | INTERNET_FLAG_NO_CACHE_WRITE;
+
+		if (m_urlComponents.nScheme == INTERNET_SCHEME_HTTPS)
+		{
+			flags |= (SECURITY_IGNORE_ERROR_MASK |
+				SECURITY_INTERNET_MASK | INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP |
+				INTERNET_FLAG_SECURE | INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP |
+				INTERNET_FLAG_RELOAD | INTERNET_FLAG_IGNORE_CERT_CN_INVALID | INTERNET_FLAG_IGNORE_CERT_DATE_INVALID);		}
+
 		// 4、打开一个请求
 		hRequest = HttpOpenRequestA(s_hSessison
 			, m_pInfo->m_nRequestType == REQUESET_TYPE_GET ? "GET" : "POST"
 			, m_urlComponents.lpszUrlPath
 			, NULL
-			, "" , NULL, 0, 0);
+			, "", NULL, flags, 0);
 
 		if (hRequest == NULL)
 		{
@@ -81,15 +92,26 @@ bool DownCore_WinINet::Down()
 			sprintf_s(sTmp, "HttpOpenRequestA failed, error code : %d", GetLastError());
 			throw std::exception(sTmp);
 		}
-		
-		// 5、设置首部字段
-// 		std::string sHeader = m_pInfo->m_sBody;
-// 		
-// 		if (!HttpAddRequestHeadersA(hRequest, sHeader.data(), sHeader.length(), HTTP_ADDREQ_FLAG_ADD | HTTP_ADDREQ_FLAG_REPLACE))
-// 		{
-// 			throw std::exception("HttpAddRequestHeadersA : failed");
-// 		}
 
+		if (m_urlComponents.nScheme == INTERNET_SCHEME_HTTPS)
+		{
+			// 忽略证书错误
+			DWORD flags = 0; DWORD len = sizeof(flags);
+			InternetQueryOption(hRequest, INTERNET_OPTION_SECURITY_FLAGS, &flags, &len);
+			flags |= (SECURITY_FLAG_IGNORE_UNKNOWN_CA | SECURITY_FLAG_IGNORE_WRONG_USAGE);
+			InternetSetOption(hRequest, INTERNET_OPTION_SECURITY_FLAGS, &flags, sizeof(flags));
+		}
+
+		// 5、设置首部字段
+		std::string sHeader = m_pInfo->m_sHead;
+		
+		if (strlen(sHeader.c_str()) > 0)
+		{
+			if (!HttpAddRequestHeadersA(hRequest, sHeader.c_str(), (DWORD)strlen(sHeader.c_str()), HTTP_ADDREQ_FLAG_ADD | HTTP_ADDREQ_FLAG_REPLACE))
+			{
+				throw std::exception("HttpAddRequestHeadersA : failed");			}
+		}
+		
 		__int64 nSize = 0;
 		char * pBuff = 0;
 
@@ -103,7 +125,7 @@ bool DownCore_WinINet::Down()
 
 		// 6、发送请求
 		if (!HttpSendRequestA(hRequest
-			, m_pInfo->m_sHead.c_str(), DWORD(m_pInfo->m_sHead.size())
+			, 0, 0
 			, (void*)pBuff, DWORD(nSize)))
 		{
 			if (pBuff)
@@ -120,7 +142,6 @@ bool DownCore_WinINet::Down()
 		{
 			delete[] pBuff;
 		}
-
 
 		// 等待...
 		DWORD dwStatusCode;
@@ -141,9 +162,17 @@ bool DownCore_WinINet::Down()
 			}
 		}
 
+		DWORD nAllSize;
+		if (!HttpQueryInfoA(hRequest, HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER,
+			&nAllSize, &dwSizeDW, NULL))
+		{
+			nAllSize = 0;
+		}
+
 		WCHAR buf[2048];
 		DWORD bufSize = sizeof(buf);
 		DWORD bufRead = 0;
+		DWORD nCurrentSize = 0;
 
 		do
 		{
@@ -154,6 +183,8 @@ bool DownCore_WinINet::Down()
 				throw std::exception(sTmp);
 			}
 
+			nCurrentSize += bufRead;
+			Progress((double)nAllSize, (double)nCurrentSize);
 			Write(buf, bufRead);
 
 			while (m_bPause)
@@ -167,6 +198,7 @@ bool DownCore_WinINet::Down()
 	{
 		GetDoggy().Bark_Error_Log(e.what());
 		bRes = false;
+		sDes = e.what();
 	}
 
 	if (hRequest != NULL)
@@ -198,7 +230,7 @@ bool DownCore_WinINet::CrackUrl()
 	{
 		return false;
 	}
-	else if (m_urlComponents.nScheme != INTERNET_SCHEME_HTTP)
+	else if (m_urlComponents.nScheme != INTERNET_SCHEME_HTTP && m_urlComponents.nScheme != INTERNET_SCHEME_HTTPS)
 	{
 		return false;
 	}

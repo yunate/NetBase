@@ -27,7 +27,7 @@ Downloader::Downloader(const RequestInfo& info) :
 	}
 	else
 	{
-		m_pOutStream = new ZMFileStream(base::MultibytesToUnicode(m_sTempPath.c_str(), 0), fmOpenReadWrite);
+		m_pOutStream = new ZMFileStream(base::MultibytesToUnicode(m_sTempPath.c_str(), 0), fmOpenReadWrite | fmCreate);
 	}
 }
 
@@ -51,7 +51,19 @@ bool Downloader::DownProcessCallBack(
 	double dnow								// 下载使用（已下载）
 )
 {
+	bool bStop = false;
 	OnDownLoading(dtotal, dnow);
+
+	if (m_Info.m_ProcessEvent)
+	{
+		m_Info.m_ProcessEvent(m_Info.m_nId, (INT64)dtotal, (INT64)dnow, bStop);
+	}
+
+	if (bStop)
+	{
+		m_pDownCore->Stop();
+	}
+
 	return true;
 }
 
@@ -69,8 +81,11 @@ void Downloader::_Execute()
 		, std::bind(&Downloader::WriteDownFileCallBack, this, std::placeholders::_1, std::placeholders::_2)
 		, std::bind(&Downloader::DownProcessCallBack, this, std::placeholders::_1, std::placeholders::_2));
 
-	bool bRes = m_pDownCore->Down();
-	
+	NETBASE_DOWN_STATUS nResCode = NETBASE_DOWN_STATUS_NODEFINE;
+	std::string sResDes = "";
+	bool bRes = m_pDownCore->Down(nResCode, sResDes);
+	nResCode = bRes ? NETBASE_DOWN_STATUS_SUCCESS : NETBASE_DOWN_STATUS_FAILURE;
+
 	if (!m_Info.m_pOutStream)
 	{
 		delete m_pOutStream;
@@ -99,6 +114,11 @@ void Downloader::_Execute()
 	}
 
 	m_DwonloadData.m_bIsEnd = true;
+
+	if (m_Info.m_ResponseResEvent)
+	{
+		m_Info.m_ResponseResEvent(m_Info.m_nId, nResCode, base::MultibytesToUnicode(sResDes, 0 ));
+	}
 }
 
 double Downloader::GetFileSize()

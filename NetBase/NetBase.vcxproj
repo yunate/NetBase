@@ -144,6 +144,7 @@
     <ClCompile Include="Downloader.cpp" />
     <ClCompile Include="DownloaderPool.cpp" />
     <ClCompile Include="DownloadHelper.cpp" />
+    <ClCompile Include="NetBaseExport.cpp" />
     <ClCompile Include="IDownCore.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -164,6 +165,7 @@
     <ClInclude Include="Downloader.h" />
     <ClInclude Include="DownloaderPool.h" />
     <ClInclude Include="DownloadHelper.h" />
+    <ClInclude Include="NetBaseExport.h" />
     <ClInclude Include="IDownCore.h" />
     <ClInclude Include="NetBaseHead.h" />
   </ItemGroup>

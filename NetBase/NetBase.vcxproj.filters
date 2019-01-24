@@ -66,6 +66,9 @@
     <ClCompile Include="..\lib\zmbase\string_convert.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="NetBaseExport.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Downloader.h">
@@ -123,6 +126,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="NetBaseHead.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="NetBaseExport.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

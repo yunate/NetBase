@@ -11,6 +11,8 @@
 #pragma comment(lib, "Normaliz.lib")
 #pragma comment(lib, "libcurl.lib")
 
+
+#define TIMEOUT 30
 DownCore_Curl::DownCore_Curl()
 {
 }
@@ -62,7 +64,7 @@ size_t progress(void *clientp,				// CURLOPT_PROGRESSDATA 传进来的
 	}
 }
 
-bool DownCore_Curl::Down()
+bool DownCore_Curl::Down(NETBASE_DOWN_STATUS & nCode, std::string & sDes)
 {
 	try
 	{
@@ -87,26 +89,33 @@ bool DownCore_Curl::Down()
 		{
 			//设置为非0表示本次操作为POST
 			curl_easy_setopt(curl, CURLOPT_POST, 1);
+		}
 
-			// 设置请求头部
+		// 设置请求头部
+		if (strlen(m_pInfo->m_sHead.c_str()) > 0)
+		{
 			headers = curl_slist_append(headers, m_pInfo->m_sHead.c_str());
 			curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
-
-			if (m_pInfo->m_pBodyStream)
-			{
-				INT64 nSize = m_pInfo->m_pBodyStream->GetSize();
-				char * pBuff = new char[(unsigned int)nSize];
-				m_pInfo->m_pBodyStream->Seek(0, FILE_BEGIN);
-				m_pInfo->m_pBodyStream->Read(pBuff, (DWORD)nSize);
-
-				// 设置要POST的JSON数据
-				curl_easy_setopt(curl, CURLOPT_POSTFIELDS, pBuff);
-
-				//设置上传json串长度,这个设置可以忽略
-				curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, nSize);
-				delete[] pBuff;
-			}
 		}
+
+		if (m_pInfo->m_pBodyStream)
+		{
+			INT64 nSize = m_pInfo->m_pBodyStream->GetSize();
+			char * pBuff = new char[(unsigned int)nSize];
+			m_pInfo->m_pBodyStream->Seek(0, FILE_BEGIN);
+			m_pInfo->m_pBodyStream->Read(pBuff, (DWORD)nSize);
+
+			// 设置要POST的JSON数据
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, pBuff);
+
+			//设置上传json串长度,这个设置可以忽略
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, nSize);
+			delete[] pBuff;
+		}
+
+		//设定为验证证书和HOST
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1L);
+		curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2L);
 
 		// 运行重定向
 		curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
@@ -146,6 +155,7 @@ bool DownCore_Curl::Down()
 	catch (const std::exception& e)
 	{
 		GetDoggy().Bark_Error_Log(e.what());
+		sDes = e.what();
 		return false;
 	}
 	
