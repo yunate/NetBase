@@ -26,13 +26,13 @@ void main()
 {
 	//_CrtSetBreakAlloc(99);
 	__int64 t1 = clock();
-	bool bGet = true;
+	bool bGet = false;
 
 	if (bGet)
 	{
 		ZMFileStream  pOutStream(L"C:\\d\\2.json", fmOpenReadWrite | fmCreate);
 
-		if (INVALID_HANDLE_VALUE != pOutStream.GetHandler())
+		//if (INVALID_HANDLE_VALUE != pOutStream.GetHandler())
 		{
 			HttpHeader  headers;
 			RequestInfo info;
