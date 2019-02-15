@@ -4,6 +4,9 @@
 #include <time.h>
 #include <map>
 
+
+#pragma comment(lib,"NetBase3.lib")
+
 // ÄÚ´æÐ¹Â¶¼ì²âÆ÷
 // #ifndef NDEBUG
 // #pragma comment(lib, "..//vld//release//vld.lib")
@@ -47,7 +50,6 @@ void main()
 			//info.m_nTimeOut = 10000;
 			HttpGet(info);
 		}
-		
 	}
 	else
 	{

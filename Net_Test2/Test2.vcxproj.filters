@@ -15,30 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="NetBaseExport.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="NetBaseHead.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="..\lib\zmbase\Streams.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="..\lib\zmbase\string_convert.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="NetBaseExport_Curl.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="..\lib\zmbase\streams.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="..\lib\zmbase\string_convert.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="NetBaseExport_WinINet.cpp">
+    <ClCompile Include="Main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
