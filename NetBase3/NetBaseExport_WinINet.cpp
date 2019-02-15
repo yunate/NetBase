@@ -213,7 +213,12 @@ bool HttpGet(RequestInfo & info)
 					info.m_ProgressCallback(info.m_nId, (INT64)nAllSize, (INT64)nCurrentSize, bStop);
 				}
 
-				info.m_ResponseStream->Write((char*)buf, bufRead);
+				if (-1 == info.m_ResponseStream->Write((char*)buf, bufRead))
+				{
+					nStatus = NDS_READFILEFAILURE;
+					break;
+				}
+
 			} while (bufRead != 0 && !bStop);
 
 		} while (0);
@@ -434,7 +439,12 @@ bool HttpPost(RequestInfo & info)
 
 					std::string buff;
 					buff.resize(nCurSize);
-					info.m_RequeseBodyStream->Read((WCHAR*)(buff.c_str()), (DWORD)nCurSize);
+
+					if (-1 == info.m_RequeseBodyStream->Read((WCHAR*)(buff.c_str()), (DWORD)nCurSize))
+					{
+						bWrite = false;
+						break;
+					}
 
 					DWORD dwBytesWritten = -1;
 
@@ -517,7 +527,12 @@ bool HttpPost(RequestInfo & info)
 					info.m_ProgressCallback(info.m_nId, (INT64)nAllSize, (INT64)nCurrentSize, bStop);
 				}
 
-				info.m_ResponseStream->Write((char*)buf, bufRead);
+				if (-1 == info.m_ResponseStream->Write((char*)buf, bufRead))
+				{
+					nStatus = NDS_READFILEFAILURE;
+					break;
+				}
+
 			} while (bufRead != 0 && !bStop);
 
 		} while (0);

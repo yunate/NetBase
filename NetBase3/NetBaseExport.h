@@ -41,10 +41,10 @@ typedef struct RequestInfo
 	unsigned int			m_nId					= 0;		// id，回调时候使用
 	ZMString				m_sUrl					= L"";		// url
 	HttpHeader				m_RequestHeadMap;					// http头，尾部不要有\0等其它字符
-	ZMStream *				m_ResponseStream		= 0;		// 输出流
+	ZMStream *				m_ResponseStream		= 0;		// 输出流 m_ResponseStream->Write 返回-1认为失败
 	ProgressCallback		m_ProgressCallback		= 0;		// 进度回调
 	ResultCallBack			m_ResultCallback		= 0;		// 结束回调
-	ZMStream *				m_RequeseBodyStream		= 0;		// post使用，http body输入流，尾部不要有\0等其它字符
+	ZMStream *				m_RequeseBodyStream		= 0;		// post使用，http body输入流，尾部不要有\0等其它字符 m_RequeseBodyStream->Read 返回-1认为失败
 	int						m_nTimeOut				= -1;		// 超时(ms)，大于0时有效，这个参数有效时候将创建一个额外的线程用来计时
 } RequestInfo;
 
