@@ -26,7 +26,7 @@ void main()
 {
 	//_CrtSetBreakAlloc(99);
 	__int64 t1 = clock();
-	bool bGet = false;
+	bool bGet = true;
 
 	if (bGet)
 	{
@@ -37,14 +37,14 @@ void main()
 			HttpHeader  headers;
 			RequestInfo info;
 			info.m_nId = 0;
-			info.m_sUrl = L"http://down.udashi.com/Local%20mode/PE/4.7.38.3/WIN03PE.ISO";
-			//info.m_sUrl = L"https://docs.microsoft.com/zh-cn/azure/";
+			//info.m_sUrl = L"http://down.udashi.com/Local%20mode/PE/4.7.38.3/WIN03PE.ISO";
+			info.m_sUrl = L"https://docs.microsoft.com/zh-cn/azure/";
 
 			info.m_RequestHeadMap = headers;
 			info.m_ResponseStream = &pOutStream;
 			info.m_ProgressCallback = process;
 			info.m_ResultCallback = end;
-			//info.m_nTimeOut = 10000;
+			info.m_nTimeOut = 10000;
 			HttpGet(info);
 		}
 		

@@ -14,7 +14,8 @@ enum NETBASE_DOWN_STATUS
 {
 	NDS_NODEFINE = -1,
 	NDS_SUCCESS  = 0,
-	NDS_RESPONSESTREAM,					// 输出流无效 
+	NDS_RESPONSESTREAMINVALID,			// 输出流无效 
+	NDS_REQUESTBODYSTREAMINVALID,		// 输入流无效 
 	NDS_CRACKURLFAILURE,				// url crack 失败 
 	NDS_SCHEMEERROR,					// scheme 不是http/https
 	NDS_INTERNETOPENFAILURE,			// 打开网络失败				（InternetOpen）
@@ -64,12 +65,14 @@ typedef struct RequestInfo
 /*
 	Get 方式下载
 	@param info : 输入,见RequestInfo
+	@return : true 成功，false 失败
 */
 bool  HttpGet(RequestInfo & info);
 
 /*
 	post 方式下载
 	@param info : 输入,见RequestInfo
+	@return : true 成功，false 失败
 */
 bool  HttpPost(RequestInfo & info);
 

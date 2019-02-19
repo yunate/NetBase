@@ -45,7 +45,7 @@ bool HttpGet(RequestInfo & info)
 		{
 			if (!info.m_ResponseStream)
 			{
-				nStatus = NDS_RESPONSESTREAM;
+				nStatus = NDS_RESPONSESTREAMINVALID;
 				break;
 			}
 
@@ -72,7 +72,7 @@ bool HttpGet(RequestInfo & info)
 
 			if (TRUE != InternetCrackUrl(info.m_sUrl.c_str(), 0, NULL, &urlComponents))
 			{
-				nStatus = NDS_RESPONSESTREAM;
+				nStatus = NDS_RESPONSESTREAMINVALID;
 				break;
 			}
 
@@ -215,7 +215,7 @@ bool HttpGet(RequestInfo & info)
 
 				if (-1 == info.m_ResponseStream->Write((char*)buf, bufRead))
 				{
-					nStatus = NDS_READFILEFAILURE;
+					nStatus = NDS_RESPONSESTREAMINVALID;
 					break;
 				}
 
@@ -241,11 +241,6 @@ bool HttpGet(RequestInfo & info)
 		if (hInternet)
 		{
 			InternetCloseHandle(hInternet);
-		}
-
-		if (info.m_ResultCallback)
-		{
-			info.m_ResultCallback(info.m_nId, nStatus);
 		}
 	};
 
@@ -283,6 +278,11 @@ bool HttpGet(RequestInfo & info)
 		releaseWininet();
 	}
 
+	if (info.m_ResultCallback)
+	{
+		info.m_ResultCallback(info.m_nId, nStatus);
+	}
+
 	return nStatus == NDS_SUCCESS;
 }
 
@@ -300,7 +300,7 @@ bool HttpPost(RequestInfo & info)
 		{
 			if (!info.m_ResponseStream)
 			{
-				nStatus = NDS_RESPONSESTREAM;
+				nStatus = NDS_RESPONSESTREAMINVALID;
 				break;
 			}
 
@@ -327,7 +327,7 @@ bool HttpPost(RequestInfo & info)
 
 			if (TRUE != InternetCrackUrl(info.m_sUrl.c_str(), 0, NULL, &urlComponents))
 			{
-				nStatus = NDS_RESPONSESTREAM;
+				nStatus = NDS_RESPONSESTREAMINVALID;
 				break;
 			}
 
@@ -425,7 +425,8 @@ bool HttpPost(RequestInfo & info)
 					break;
 				}
 
-				bool bWrite = true;
+				NETBASE_DOWN_STATUS nTmpStatus = NDS_NODEFINE;
+
 				while (nAllSize > 0)
 				{
 					int nCurSize = nPerSize;
@@ -442,30 +443,32 @@ bool HttpPost(RequestInfo & info)
 
 					if (-1 == info.m_RequeseBodyStream->Read((WCHAR*)(buff.c_str()), (DWORD)nCurSize))
 					{
-						bWrite = false;
+						nTmpStatus = NDS_REQUESTBODYSTREAMINVALID;
 						break;
 					}
-
+					
 					DWORD dwBytesWritten = -1;
 
 					if (FALSE == InternetWriteFile(hRequest, buff.c_str(), nCurSize, &dwBytesWritten)
 						|| dwBytesWritten != nCurSize)
 					{
-						bWrite = false;
+						nTmpStatus = NDS_WRITEFILEFAILURE;
 						break;
 					}
 				}
 
-				if (!HttpEndRequest(hRequest, NULL, 0, 0))
+				if (nTmpStatus != NDS_NODEFINE)
 				{
-					nStatus = NDS_ENDQUESRFAILURE;
+					nStatus = nTmpStatus;
 					break;
 				}
-
-				if (!bWrite)
+				else
 				{
-					nStatus = NDS_WRITEFILEFAILURE;
-					break;
+					if (!HttpEndRequest(hRequest, NULL, 0, 0))
+					{
+						nStatus = NDS_ENDQUESRFAILURE;
+						break;
+					}
 				}
 			}
 			else
@@ -529,7 +532,7 @@ bool HttpPost(RequestInfo & info)
 
 				if (-1 == info.m_ResponseStream->Write((char*)buf, bufRead))
 				{
-					nStatus = NDS_READFILEFAILURE;
+					nStatus = NDS_RESPONSESTREAMINVALID;
 					break;
 				}
 
@@ -555,11 +558,6 @@ bool HttpPost(RequestInfo & info)
 		if (hInternet)
 		{
 			InternetCloseHandle(hInternet);
-		}
-
-		if (info.m_ResultCallback)
-		{
-			info.m_ResultCallback(info.m_nId, nStatus);
 		}
 	};
 
@@ -594,6 +592,11 @@ bool HttpPost(RequestInfo & info)
 	{
 		sendrequest();
 		releaseWininet();
+	}
+
+	if (info.m_ResultCallback)
+	{
+		info.m_ResultCallback(info.m_nId, nStatus);
 	}
 
 	return nStatus == NDS_SUCCESS;
