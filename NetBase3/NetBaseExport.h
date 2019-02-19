@@ -7,6 +7,9 @@
 
 #define   BUFFSIZE 2048
 
+/*
+	结果
+*/
 enum NETBASE_DOWN_STATUS
 {
 	NDS_NODEFINE = -1,
@@ -30,10 +33,20 @@ enum NETBASE_DOWN_STATUS
 
 using  HttpHeader =std::map<ZMString, ZMString>;
 
-//进度回调
+/*
+	进度回调
+	@param id : 下载表示 对应RequestInfo中的m_nId
+	@param contentLength : 总大小
+	@param readCount : 当前下载大小
+	@param abort : 设置abort = true 下载正常停止
+*/
 using ProgressCallback = std::function<void(int id, INT64  contentLength, INT64 readCount, bool& abort)>;
 
-//结果回调
+/*
+	结果回调
+	@param id : 下载表示 对应RequestInfo中的m_nId
+	@param responseCode : 返回结果，见NETBASE_DOWN_STATUS。（abort = true时候为用户手动停止，此时responseCode = NDS_SUCCESS）
+*/
 using ResultCallBack = std::function<void(int id, NETBASE_DOWN_STATUS responseCode)>;
 
 typedef struct RequestInfo
@@ -48,8 +61,16 @@ typedef struct RequestInfo
 	int						m_nTimeOut				= -1;		// 超时(ms)，大于0时有效，这个参数有效时候将创建一个额外的线程用来计时
 } RequestInfo;
 
+/*
+	Get 方式下载
+	@param info : 输入,见RequestInfo
+*/
 bool  HttpGet(RequestInfo & info);
 
+/*
+	post 方式下载
+	@param info : 输入,见RequestInfo
+*/
 bool  HttpPost(RequestInfo & info);
 
 #endif // 
