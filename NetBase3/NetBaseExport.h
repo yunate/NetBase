@@ -60,20 +60,31 @@ typedef struct RequestInfo
 	ResultCallBack			m_ResultCallback		= 0;		// 结束回调
 	ZMStream *				m_RequeseBodyStream		= 0;		// post使用，http body输入流，尾部不要有\0等其它字符 m_RequeseBodyStream->Read 返回-1认为失败
 	int						m_nTimeOut				= -1;		// 超时(ms)，大于0时有效，这个参数有效时候将创建一个额外的线程用来计时
+	bool					m_bResume				= false;    // 断点续传
 } RequestInfo;
 
 /*
 	Get 方式下载
 	@param info : 输入,见RequestInfo
-	@return : true 成功，false 失败
+	@return : NDS_SUCCESS 成功，其他失败
 */
-bool  HttpGet(RequestInfo & info);
+NETBASE_DOWN_STATUS  HttpGet(RequestInfo & info);
 
 /*
 	post 方式下载
 	@param info : 输入,见RequestInfo
-	@return : true 成功，false 失败
+	@return : NDS_SUCCESS 成功，其他失败
 */
-bool  HttpPost(RequestInfo & info);
+NETBASE_DOWN_STATUS  HttpPost(RequestInfo & info);
+
+/*
+	下载到文件,此函数不会创建临时文件，如有需求请自己手动创建
+	@param sSaveFile : 即将保存的路径，如果文件不存在则自动简单创建，如果创建失败则返回NDS_RESPONSESTREAMINVALID
+	@param info : 输入,见RequestInfo，此时m_ResponseStream无效
+	@param bGet : 是否使用Get方式下载，默认为true
+	@param bResume : true 支持断点续传，false不支持，默认false
+	@return : NDS_SUCCESS 成功，其他失败
+*/
+NETBASE_DOWN_STATUS DownToFile(const ZMString & sSaveFile, RequestInfo & info, bool bGet = true, bool bResume = false);
 
 #endif // 

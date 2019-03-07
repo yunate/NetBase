@@ -31,7 +31,7 @@ ZMString FormateHeader(const HttpHeader & headers)
 	return sRes;
 }
 
-bool HttpGet(RequestInfo & info)
+NETBASE_DOWN_STATUS HttpGet(RequestInfo & info)
 {
 	NETBASE_DOWN_STATUS nStatus				= NDS_SUCCESS;
 	HINTERNET			hInternet			= NULL;
@@ -120,82 +120,122 @@ bool HttpGet(RequestInfo & info)
 					| INTERNET_FLAG_IGNORE_CERT_DATE_INVALID);
 			}
 
-			// 4、打开一个请求
-			hRequest = HttpOpenRequest(hSession
-				, _T("GET")
-				, urlComponents.lpszUrlPath
-				, NULL
-				, _T(""), NULL, flags, 0);
+			wchar_t wcAllSize[33] ={ 0 };
 
-			if (!hRequest)
+			auto openrequest = [&](bool bResume)
 			{
-				nStatus = NDS_REQUESTFAILURE;
-				break;
-			}
-
-			if (urlComponents.nScheme == INTERNET_SCHEME_HTTPS)
-			{
-				// 忽略证书错误
-				DWORD flags = 0; DWORD len = sizeof(flags);
-				InternetQueryOption(hRequest, INTERNET_OPTION_SECURITY_FLAGS, &flags, &len);
-				flags |= (SECURITY_FLAG_IGNORE_UNKNOWN_CA | SECURITY_FLAG_IGNORE_WRONG_USAGE);
-				InternetSetOption(hRequest, INTERNET_OPTION_SECURITY_FLAGS, &flags, sizeof(flags));
-			}
-
-			// 5、设置首部字段
-			ZMString sHeader = FormateHeader(info.m_RequestHeadMap);
-
-			if (wcslen(sHeader.c_str()) > 0)
-			{
-				if (!HttpAddRequestHeaders(hRequest
-					, sHeader.c_str()
-					, (DWORD)wcslen(sHeader.c_str())
-					, HTTP_ADDREQ_FLAG_ADD | HTTP_ADDREQ_FLAG_REPLACE))
+				do
 				{
-					nStatus = NDS_ADDREQUESTFAILURE;
-					break;
-				}
-			}
+					hRequest = HttpOpenRequest(hSession
+						, _T("GET")
+						, urlComponents.lpszUrlPath
+						, NULL
+						, _T(""), NULL, flags, 0);
 
-			// 6、发送请求
-			if (!HttpSendRequest(hRequest
-				, 0, 0
-				, 0, 0))
+					if (!hRequest)
+					{
+						nStatus = NDS_REQUESTFAILURE;
+						break;
+					}
+
+					if (urlComponents.nScheme == INTERNET_SCHEME_HTTPS)
+					{
+						// 忽略证书错误
+						DWORD flags = 0; DWORD len = sizeof(flags);
+						InternetQueryOption(hRequest, INTERNET_OPTION_SECURITY_FLAGS, &flags, &len);
+						flags |= (SECURITY_FLAG_IGNORE_UNKNOWN_CA | SECURITY_FLAG_IGNORE_WRONG_USAGE);
+						InternetSetOption(hRequest, INTERNET_OPTION_SECURITY_FLAGS, &flags, sizeof(flags));
+					}
+
+					// 5、设置首部字段
+					HttpHeader tmpHead = info.m_RequestHeadMap;
+
+					if (bResume && info.m_ResponseStream->GetSize() > 0)
+					{
+						wchar_t buffer[255];
+						ZMString sTmp = _T("bytes=");
+						_i64tow_s(info.m_ResponseStream->GetSize(), buffer, _countof(buffer), 10);
+						sTmp += buffer;
+						sTmp += _T("-");
+						sTmp += wcAllSize;
+						tmpHead[_T("Range")] = sTmp;
+						info.m_ResponseStream->Seek(0, FILE_END);
+					}
+
+					ZMString sHeader = FormateHeader(tmpHead);
+
+					if (wcslen(sHeader.c_str()) > 0)
+					{
+						if (!HttpAddRequestHeaders(hRequest
+							, sHeader.c_str()
+							, (DWORD)wcslen(sHeader.c_str())
+							, HTTP_ADDREQ_FLAG_ADD | HTTP_ADDREQ_FLAG_REPLACE))
+						{
+							nStatus = NDS_ADDREQUESTFAILURE;
+							break;
+						}
+					}
+
+					// 6、发送请求
+					if (!HttpSendRequest(hRequest
+						, 0, 0
+						, 0, 0))
+					{
+						nStatus = NDS_SENDREQUESRFAILURE;
+						break;
+					}
+
+					// 等待...
+					DWORD dwStatusCode;
+					DWORD dwSizeDW = sizeof(DWORD);
+
+					if (!HttpQueryInfo(hRequest, HTTP_QUERY_FLAG_NUMBER | HTTP_QUERY_STATUS_CODE, &dwStatusCode, &dwSizeDW, NULL))
+					{
+						nStatus = NDS_QUERYINFOFAILURE;
+						break;
+					}
+					else
+					{
+						if (dwStatusCode >= 400)
+						{
+							nStatus = NDS_RETURNCODEOVER400;
+							break;
+						}
+					}
+
+					DWORD dwAZLen = sizeof(wcAllSize);
+
+					if (!HttpQueryInfo(hRequest, HTTP_QUERY_CONTENT_LENGTH,
+						&wcAllSize, &dwAZLen, NULL))
+					{
+						wcAllSize[0] = 0;
+					}
+				} while (0);
+			};
+
+			openrequest(false);
+
+			if (nStatus != NDS_SUCCESS)
 			{
-				nStatus = NDS_SENDREQUESRFAILURE;
 				break;
 			}
 
-			// 等待...
-			DWORD dwStatusCode;
-			DWORD dwSizeDW = sizeof(DWORD);
-
-			if (!HttpQueryInfo(hRequest, HTTP_QUERY_FLAG_NUMBER | HTTP_QUERY_STATUS_CODE, &dwStatusCode, &dwSizeDW, NULL))
+			if (info.m_bResume && !bEnd)
 			{
-				nStatus = NDS_QUERYINFOFAILURE;
+				InternetCloseHandle(hRequest);
+				openrequest(true);
+			}
+
+			if (nStatus != NDS_SUCCESS)
+			{
 				break;
-			}
-			else
-			{
-				if (dwStatusCode >= 400)
-				{
-					nStatus = NDS_RETURNCODEOVER400;
-					break;
-				}
-			}
-
-			DWORD nAllSize;
-
-			if (!HttpQueryInfo(hRequest, HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER,
-				&nAllSize, &dwSizeDW, NULL))
-			{
-				nAllSize = 0;
 			}
 
 			WCHAR buf[BUFFSIZE];
 			DWORD bufSize = sizeof(buf);
 			DWORD bufRead = 0;
-			DWORD nCurrentSize = 0;
+			INT64 nCurrentSize = 0;
+			INT64 nAllDownSize = _wtoi64(wcAllSize);
 			bool bStop = false;
 
 			do
@@ -210,7 +250,7 @@ bool HttpGet(RequestInfo & info)
 
 				if (info.m_ProgressCallback)
 				{
-					info.m_ProgressCallback(info.m_nId, (INT64)nAllSize, (INT64)nCurrentSize, bStop);
+					info.m_ProgressCallback(info.m_nId, nAllDownSize, nCurrentSize, bStop);
 				}
 
 				if (-1 == info.m_ResponseStream->Write((char*)buf, bufRead))
@@ -250,13 +290,13 @@ bool HttpGet(RequestInfo & info)
 		bool bTimeOut = false;
 		std::thread t(sendrequest);
 
-		// 不需要加同步
 		while (!bEnd)
 		{
 			DWORD nCurTime = GetTickCount();
 
 			if (int(nCurTime - startTime) > info.m_nTimeOut)
 			{
+				bEnd = true;
 				bTimeOut = true;
 				break;
 			}
@@ -264,6 +304,7 @@ bool HttpGet(RequestInfo & info)
 			Sleep(10);
 		}
 
+		// 这个地方可能需要同步
 		releaseWininet();
 		t.join();
 
@@ -283,10 +324,10 @@ bool HttpGet(RequestInfo & info)
 		info.m_ResultCallback(info.m_nId, nStatus);
 	}
 
-	return nStatus == NDS_SUCCESS;
+	return nStatus;
 }
 
-bool HttpPost(RequestInfo & info)
+NETBASE_DOWN_STATUS HttpPost(RequestInfo & info)
 {
 	NETBASE_DOWN_STATUS nStatus				= NDS_SUCCESS;
 	HINTERNET			hInternet			= NULL;
@@ -370,149 +411,189 @@ bool HttpPost(RequestInfo & info)
 					| INTERNET_FLAG_RELOAD | INTERNET_FLAG_IGNORE_CERT_CN_INVALID | INTERNET_FLAG_IGNORE_CERT_DATE_INVALID);
 			}
 
+			wchar_t wcAllSize[33] ={ 0 };
+
 			// 4、打开一个请求
-			hRequest = HttpOpenRequest(hSession
-				, _T("POST")
-				, urlComponents.lpszUrlPath
-				, NULL
-				, _T(""), NULL, flags, 0);
-
-			if (hRequest == NULL)
+			auto openrequest = [&](bool bResume)
 			{
-				nStatus = NDS_REQUESTFAILURE;
+				do 
+				{
+					hRequest = HttpOpenRequest(hSession
+						, _T("POST")
+						, urlComponents.lpszUrlPath
+						, NULL
+						, _T(""), NULL, flags, 0);
+
+					if (hRequest == NULL)
+					{
+						nStatus = NDS_REQUESTFAILURE;
+						break;
+					}
+
+					if (urlComponents.nScheme == INTERNET_SCHEME_HTTPS)
+					{
+						// 忽略证书错误
+						DWORD flags = 0; DWORD len = sizeof(flags);
+						InternetQueryOption(hRequest, INTERNET_OPTION_SECURITY_FLAGS, &flags, &len);
+						flags |= (SECURITY_FLAG_IGNORE_UNKNOWN_CA | SECURITY_FLAG_IGNORE_WRONG_USAGE);
+						InternetSetOption(hRequest, INTERNET_OPTION_SECURITY_FLAGS, &flags, sizeof(flags));
+					}
+
+					// 5、设置首部字段
+					HttpHeader tmpHead = info.m_RequestHeadMap;
+
+					if (bResume && info.m_ResponseStream->GetSize() > 0)
+					{
+						wchar_t buffer[255];
+						ZMString sTmp = _T("bytes=");
+						_i64tow_s(info.m_ResponseStream->GetSize(), buffer, _countof(buffer), 10);
+						sTmp += buffer;
+						sTmp += _T("-");
+						sTmp += wcAllSize;
+						tmpHead[_T("Range")] = sTmp;
+						info.m_ResponseStream->Seek(0, FILE_END);
+					}
+
+					ZMString sHeader = FormateHeader(tmpHead);
+
+					if (wcslen(sHeader.c_str()) > 0)
+					{
+						if (!HttpAddRequestHeaders(hRequest, sHeader.c_str(), (DWORD)wcslen(sHeader.c_str()), HTTP_ADDREQ_FLAG_ADD | HTTP_ADDREQ_FLAG_REPLACE))
+						{
+							nStatus = NDS_ADDREQUESTFAILURE;
+							break;
+						}
+					}
+
+					// 6、发送请求
+
+					if (info.m_RequeseBodyStream)
+					{
+						int nPerSize = BUFFSIZE;
+						INT64 nAllSize = info.m_RequeseBodyStream->GetSize();
+						info.m_RequeseBodyStream->Seek(0, FILE_BEGIN);
+
+						// 发送
+						INTERNET_BUFFERS BufferIn ={ 0 };
+						BufferIn.dwStructSize = sizeof(INTERNET_BUFFERS);
+						BufferIn.dwBufferTotal = (DWORD)nAllSize;
+
+						if (!HttpSendRequestEx(hRequest
+							, &BufferIn, 0
+							, 0, 0))
+						{
+							nStatus = NDS_SENDREQUESRFAILURE;
+							break;
+						}
+
+						NETBASE_DOWN_STATUS nTmpStatus = NDS_NODEFINE;
+
+						while (nAllSize > 0)
+						{
+							int nCurSize = nPerSize;
+
+							if (nCurSize > nAllSize)
+							{
+								nCurSize = (int)nAllSize;
+							}
+
+							nAllSize -= nCurSize;
+
+							std::string buff;
+							buff.resize(nCurSize);
+
+							if (-1 == info.m_RequeseBodyStream->Read((WCHAR*)(buff.c_str()), (DWORD)nCurSize))
+							{
+								nTmpStatus = NDS_REQUESTBODYSTREAMINVALID;
+								break;
+							}
+
+							DWORD dwBytesWritten = -1;
+
+							if (FALSE == InternetWriteFile(hRequest, buff.c_str(), nCurSize, &dwBytesWritten)
+								|| dwBytesWritten != nCurSize)
+							{
+								nTmpStatus = NDS_WRITEFILEFAILURE;
+								break;
+							}
+						}
+
+						if (nTmpStatus != NDS_NODEFINE)
+						{
+							nStatus = nTmpStatus;
+							break;
+						}
+						else
+						{
+							if (!HttpEndRequest(hRequest, NULL, 0, 0))
+							{
+								nStatus = NDS_ENDQUESRFAILURE;
+								break;
+							}
+						}
+					}
+					else
+					{
+						if (!HttpSendRequest(hRequest
+							, 0, 0
+							, 0, 0))
+						{
+							nStatus = NDS_SENDREQUESRFAILURE;
+							break;
+						}
+					}
+
+					// 等待...
+					DWORD dwStatusCode;
+					DWORD dwSizeDW = sizeof(DWORD);
+
+					if (!HttpQueryInfo(hRequest, HTTP_QUERY_FLAG_NUMBER | HTTP_QUERY_STATUS_CODE, &dwStatusCode, &dwSizeDW, NULL))
+					{
+						nStatus = NDS_QUERYINFOFAILURE;
+						break;
+					}
+					else
+					{
+						if (dwStatusCode >= 400)
+						{
+							nStatus = NDS_RETURNCODEOVER400;
+							break;
+						}
+					}
+
+					DWORD dwAZLen = sizeof(wcAllSize);
+
+					if (!HttpQueryInfo(hRequest, HTTP_QUERY_CONTENT_LENGTH,
+						&wcAllSize, &dwAZLen, NULL))
+					{
+						wcAllSize[0] = 0;
+					}
+				} while (0);
+			};
+
+			openrequest(false);
+
+			if (nStatus != NDS_SUCCESS)
+			{
 				break;
 			}
 
-			if (urlComponents.nScheme == INTERNET_SCHEME_HTTPS)
+			if (info.m_bResume && !bEnd)
 			{
-				// 忽略证书错误
-				DWORD flags = 0; DWORD len = sizeof(flags);
-				InternetQueryOption(hRequest, INTERNET_OPTION_SECURITY_FLAGS, &flags, &len);
-				flags |= (SECURITY_FLAG_IGNORE_UNKNOWN_CA | SECURITY_FLAG_IGNORE_WRONG_USAGE);
-				InternetSetOption(hRequest, INTERNET_OPTION_SECURITY_FLAGS, &flags, sizeof(flags));
+				InternetCloseHandle(hRequest);
+				openrequest(true);
 			}
 
-			// 5、设置首部字段
-			ZMString sHeader = FormateHeader(info.m_RequestHeadMap);
-
-			if (wcslen(sHeader.c_str()) > 0)
+			if (nStatus != NDS_SUCCESS)
 			{
-				if (!HttpAddRequestHeaders(hRequest, sHeader.c_str(), (DWORD)wcslen(sHeader.c_str()), HTTP_ADDREQ_FLAG_ADD | HTTP_ADDREQ_FLAG_REPLACE))
-				{
-					nStatus = NDS_ADDREQUESTFAILURE;
-					break;
-				}
-			}
-
-			// 6、发送请求
-
-			if (info.m_RequeseBodyStream)
-			{
-				int nPerSize = BUFFSIZE;
-				INT64 nAllSize = info.m_RequeseBodyStream->GetSize();
-				info.m_RequeseBodyStream->Seek(0, FILE_BEGIN);
-
-				// 发送
-				INTERNET_BUFFERS BufferIn ={ 0 };
-				BufferIn.dwStructSize = sizeof(INTERNET_BUFFERS);
-				BufferIn.dwBufferTotal = (DWORD)nAllSize;
-
-				if (!HttpSendRequestEx(hRequest
-					, &BufferIn, 0
-					, 0, 0))
-				{
-					nStatus = NDS_SENDREQUESRFAILURE;
-					break;
-				}
-
-				NETBASE_DOWN_STATUS nTmpStatus = NDS_NODEFINE;
-
-				while (nAllSize > 0)
-				{
-					int nCurSize = nPerSize;
-
-					if (nCurSize > nAllSize)
-					{
-						nCurSize = (int)nAllSize;
-					}
-
-					nAllSize -= nCurSize;
-
-					std::string buff;
-					buff.resize(nCurSize);
-
-					if (-1 == info.m_RequeseBodyStream->Read((WCHAR*)(buff.c_str()), (DWORD)nCurSize))
-					{
-						nTmpStatus = NDS_REQUESTBODYSTREAMINVALID;
-						break;
-					}
-					
-					DWORD dwBytesWritten = -1;
-
-					if (FALSE == InternetWriteFile(hRequest, buff.c_str(), nCurSize, &dwBytesWritten)
-						|| dwBytesWritten != nCurSize)
-					{
-						nTmpStatus = NDS_WRITEFILEFAILURE;
-						break;
-					}
-				}
-
-				if (nTmpStatus != NDS_NODEFINE)
-				{
-					nStatus = nTmpStatus;
-					break;
-				}
-				else
-				{
-					if (!HttpEndRequest(hRequest, NULL, 0, 0))
-					{
-						nStatus = NDS_ENDQUESRFAILURE;
-						break;
-					}
-				}
-			}
-			else
-			{
-				if (!HttpSendRequest(hRequest
-					, 0, 0
-					, 0, 0))
-				{
-					nStatus = NDS_SENDREQUESRFAILURE;
-					break;
-				}
-			}
-
-
-			// 等待...
-			DWORD dwStatusCode;
-			DWORD dwSizeDW = sizeof(DWORD);
-
-			if (!HttpQueryInfo(hRequest, HTTP_QUERY_FLAG_NUMBER | HTTP_QUERY_STATUS_CODE, &dwStatusCode, &dwSizeDW, NULL))
-			{
-				nStatus = NDS_QUERYINFOFAILURE;
 				break;
-			}
-			else
-			{
-				if (dwStatusCode >= 400)
-				{
-					nStatus = NDS_RETURNCODEOVER400;
-					break;
-				}
-			}
-
-			DWORD nAllSize;
-
-			if (!HttpQueryInfo(hRequest, HTTP_QUERY_CONTENT_LENGTH | HTTP_QUERY_FLAG_NUMBER,
-				&nAllSize, &dwSizeDW, NULL))
-			{
-				nAllSize = 0;
 			}
 
 			WCHAR buf[BUFFSIZE];
 			DWORD bufSize = sizeof(buf);
 			DWORD bufRead = 0;
-			DWORD nCurrentSize = 0;
+			INT64 nCurrentSize = 0;
+			INT64 nAllDownSize = _wtoi64(wcAllSize);
 			bool bStop = false;
 
 			do
@@ -527,7 +608,7 @@ bool HttpPost(RequestInfo & info)
 
 				if (info.m_ProgressCallback)
 				{
-					info.m_ProgressCallback(info.m_nId, (INT64)nAllSize, (INT64)nCurrentSize, bStop);
+					info.m_ProgressCallback(info.m_nId, nAllDownSize, nCurrentSize, bStop);
 				}
 
 				if (-1 == info.m_ResponseStream->Write((char*)buf, bufRead))
@@ -573,6 +654,7 @@ bool HttpPost(RequestInfo & info)
 
 			if (int(nCurTime - startTime) > info.m_nTimeOut)
 			{
+				bEnd = true;
 				bTimeOut = true;
 				break;
 			}
@@ -599,6 +681,50 @@ bool HttpPost(RequestInfo & info)
 		info.m_ResultCallback(info.m_nId, nStatus);
 	}
 
-	return nStatus == NDS_SUCCESS;
+	return nStatus;
 }
+
+NETBASE_DOWN_STATUS DownToFile(const ZMString & sSaveFile, RequestInfo & info, bool bGet /*= true*/, bool bResume/* = false*/)
+{
+	FILE * file = 0;
+
+	if (0 != _wfopen_s(&file, sSaveFile.c_str(), L"r") || !file)
+	{
+		if (0 != _wfopen_s(&file, sSaveFile.c_str(), L"a") || !file)
+		{
+			// 创建文件失败
+			return NDS_RESPONSESTREAMINVALID;
+		}
+	}
+
+	fclose(file);
+	ZMFileStream  pOutStream(sSaveFile, fmOpenReadWrite/* | fmCreate*/);
+
+	if (INVALID_HANDLE_VALUE == pOutStream.GetHandler())
+	{
+		return NDS_RESPONSESTREAMINVALID;
+	}
+
+	info.m_ResponseStream = &pOutStream;
+	info.m_bResume = bResume;
+
+	if (bResume)
+	{
+		pOutStream.Seek(0, FILE_END);
+	}
+	else
+	{
+		pOutStream.Seek(0, FILE_BEGIN);
+	}
+
+	if (bGet)
+	{
+		HttpGet(info);
+	}
+	else
+	{
+		HttpPost(info);
+	}
+}
+
 #endif
